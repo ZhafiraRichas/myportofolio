@@ -5,13 +5,13 @@
 }
 
 :root {
-    --ink: #1c1917;
-    --paper: #faf6f0;
-    --accent: #d95d39;
-    --accent-dark: #a8442a;
-    --line: #e3d9c9;
-    --text-muted: #6b6459;
-    --radius: 4px;
+    --paper: #EEEEEE;         
+    --ink: #2C3222;           
+    --accent: #88b873;       
+    --accent-dark: #545d42;   
+    --line: #8B9A6E;         
+    --text-muted: #6B7852;  
+    --radius: 4px;         
 }
 
 body {
@@ -23,6 +23,20 @@ body {
 
 h1, .brand {
     font-family: "Space Grotesk", -apple-system, sans-serif;
+    font-weight: 700;
+}
+h2 {
+    font-family: "Space Grotesk", -apple-system, sans-serif;
+    font-weight: 600; 
+    padding-top: 1.5rem;
+    padding-bottom: 0.5rem;   
+}
+
+h3 {
+    font-family: "Segoe UI", -apple-system, sans-serif;
+    font-weight: 400;
+    padding-top: 1rem;
+    text-decoration: bold;
 }
 
 .container {
@@ -30,6 +44,7 @@ h1, .brand {
     margin: 0 auto;
     padding: 0 1.5rem;
 }
+
 .site-header {
     border-bottom: 1px solid var(--line);
 }
@@ -136,7 +151,7 @@ h1, .brand {
 }
 
 .social-link:hover {
-    background-color: var(--accent);
+    background-color: var(--accent-dark);
 }
 
 .hero-photo {
@@ -189,4 +204,31 @@ h1, .brand {
     .social-links {
         justify-content: flex-start;
     }
+}
+
+.button-nav {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    background-color: var(--paper);
+    color: var(--paper);
+    border-radius: var(--radius);
+    padding: 0.5rem 1.1rem;
+    transition: background-color 0.2s ease;
+}
+
+.button-nav:hover {
+    background-color: var(--accent-dark); /* Warna hijau sedikit lebih gelap */
+}
+
+.container-section{
+    border-top: 3px solid var(--line);
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+.title-section{
+    text-align: center;
+    padding: 1.5rem 0;
 }
