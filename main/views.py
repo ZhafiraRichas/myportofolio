@@ -29,11 +29,12 @@ def show_experience(request):
 
 def show_education(request):
     context = {
-        "name": "Zhafira Richas",
-        "education_list": Education.objects.all(),
-    }
-    return render(request, "education.html", context)
-
+            "name": "Zhafira Richas",
+            "education_list": Education.objects.all(),
+        }
+    return render(request, "experience.html", context)
+    
+    
 def create_project(request):
     form = ProjectForm(request.POST or None)
 
