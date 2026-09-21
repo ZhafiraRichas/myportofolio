@@ -40,3 +40,17 @@ makemigrations, berfungsi untuk mendeteksi perubahan yang Anda lakukan pada berk
 migrate, berfungsi untuk membaca berkas-berkas skrip migrasi yang belum diterapkan dan mengeksekusi perintah SQL yang sesuai ke dalam database aktual. Perintah inilah yang secara nyata membuat, mengubah, atau memperbarui tabel-tabel di dalam database agar sinkron dengan model Python Anda.
 
 Untuk penggunaan AI pada tugas kali ini sangat sedikit, saya meminta ai untuk menjelaskan tentang pertanyaan refleksi yang menurut saya kurang saya pahami sehingga bisa saya pahami lebih dalam. Untuk penambahan model dan test pada tugas ini saya hanya memodifikasi pada model experience dan tutorial 2 tanpa menggunakan AI.
+
+## Tugas 3
+1. Jelaskan mengapa kita menggunakan ModelForm pada Django alih-alih membuat form HTML secara manual. Selain itu, jelaskan pula mengapa kita diwajibkan menambahkan {% csrf_token %} pada form tersebut!
+Kalo menggunakan ModelForm lebih efisiesn karena untuk setiap data tambahan tak perlu membuat satu satu kode htmlnya, lalu untuk  {% csrf_token %} perlu ditambahankan agar prnambahan data dapat diverifikasi dan tidak terdapat data yg bocor ke publik, atau penambahan data oleh orang ketiga.
+
+2. Pada Tutorial 03, kita membahas format data JSON dan XML. Mengapa JSON lebih disukai dalam pengembangan aplikasi web modern dibandingkan XML?
+Karena strukturnya yang memudahkan, ada key yg dilanjuti value. Sintaks JSON jauh lebih bersih dan tidak memerlukan closing tag yang berulang seperti XML, jadi ukuran data yang dikirimkan lewat jaringan menjadi lebih kecil dan mempercepat waktu muat.
+
+3. Jelaskan alur yang terjadi saat kamu menggunakan fungsi view untuk mengembalikan data portofoliomu dalam bentuk JSON. Mengapa kita perlu melakukan proses serialization pada model Django sebelum datanya dikembalikan?
+Alur Fungsi View Mengembalikan JSON:
+a. User mengirim request ke URL endpoint tertentu.
+b. Fungsi view di Django menerima request tersebut dan mengambil data portofolio dari database menggunakan QuerySet (berupa objek-objek model Django).
+c. Objek model Django tersebut melalui proses serialization akan diubah ke dalam format standar.
+d. Fungsi view mengembalikan objek respons HTTP (seperti JsonResponse atau HttpResponse dengan content type JSON) berisi data terformat tersebut ke klien.

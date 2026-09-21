@@ -435,7 +435,7 @@ h3 {
     margin-top: 0;
 }
 
-.project-delete-modal {
+.project-delete-modal  {
     display: none;
     position: fixed;
     inset: 0;
