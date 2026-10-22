@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block meta %}
+    <title>Experience - {{ name }}</title>
+{% endblock meta %}
+{% block content %}
+<body>
+    <header class="site-header">
+        <div class="container">
+        <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
+            <nav>
+                <a href="{% url 'main:show_main' %}">Profile</a>
+                <a href="{% url 'main:show_experience' %}">Experience</a>
+                <a href="{% url 'main:show_projects' %}">Projects</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="experience-section" id="experience">
+            <div class="container">
+            <p class="section-kicker">Pengalaman saya</p>
+            <h1>Experience</h1>
+
+                <div class="experience-grid">
+                    {% for experience in experience_list %}
+                        <article class="experience-card">
+                            <span class="experience-category">{{ experience.category }}</span>
+                            <h2>{{ experience.title }}</h2>
+                            <p class="experience-description">{{ experience.description }}</p>
+
+                            {% if experience.thumbnail %}
+                                <p class="experience-status">
+                                    <a href="{{ experience.thumbnail }}">Lihat thumbnail</a>
+                                </p>
+                            {% endif %}
+                        </article>
+                    {% empty %}
+                        <p class="empty-state">
+                            Belum ada pengalaman yang ditambahkan.
+                        </p>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+        </div>
+</body>
+</html>

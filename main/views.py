@@ -9,13 +9,14 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied   
 from django.views.decorators.http import require_POST     
 
-from main.forms import ProjectForm
+from main.forms import EducationForm, ExperienceForm, ProjectForm
 from main.models import Experience, Project
 from main.models import Education
 import datetime
 
 NAME = "Zhafira Richas"
 
+# ~~~~~ MAIN SECTION ~~~~~
 def show_main(request):
     last_login = request.COOKIES.get('last_login', 'Belum ada sesi login / Cookie tidak ditemukan')
     context = {
@@ -30,21 +31,119 @@ def show_main(request):
     }
     return render(request, "index.html", context)
 
+# ~~~~~ EXPERIENCE SECTION ~~~~~ 
+@login_required(login_url="/login/") 
+def create_experience(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    
+    form = ExperienceForm(request.POST or None)
 
-def show_experience(request):
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Pengalaman baru berhasil ditambahkan!")
+        return redirect("main:show_experience")
+
     context = {
         "name": NAME,
-        "experience_list": Experience.objects.all(),
+        "form": form,
     }
+    return render(request, "experience_form.html", context)
+
+def show_experience(request):
+    json_response = get_experience_json(request)
+
+    experiences = serializers.deserialize(
+        "json",
+        json_response.content.decode("utf-8"),
+    )
+    experiences = [experience.object for experience in experiences]
+    title_query = request.GET.get("title", "").strip()
+        
+    context = {
+                "name": NAME,
+                "title_query": title_query,
+                "form": ExperienceForm(),
+            }
     return render(request, "experience.html", context)
 
+def get_experience_json(request):
+    title_query = request.GET.get("title", "").strip()
+    experiences = Experience.objects.all()
+
+    if title_query:
+        experiences = experiences.filter(title__icontains=title_query)
+
+    experiences_json = serializers.serialize("json", experiences)
+    return HttpResponse(experiences_json, content_type="application/json")
+
+def delete_experience(request, experience_id):
+    experience = get_object_or_404(Experience, pk=experience_id)
+
+    if request.method == "POST":
+        experience.delete()
+        messages.success(request, "Pengalaman berhasil dihapus!")
+        return redirect("main:show_experiences")
+
+    return redirect("main:show_experiences")
+
+# ~~~~~ EDUCATION SECTION ~~~~~ 
+@login_required(login_url="/login/") 
+def create_education(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    
+    form = EducationForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Pendidikan baru berhasil ditambahkan!")
+        return redirect("main:show_education")
+
+    context = {
+        "name": NAME,
+        "form": form,
+    }
+    return render(request, "education_form.html", context)
+
 def show_education(request):
+    json_response = get_education_json(request)
+
+    educations = serializers.deserialize(
+        "json",
+        json_response.content.decode("utf-8"),
+    )
+    educations = [education.object for education in educations]
+    title_query = request.GET.get("title", "").strip()
+    
     context = {
             "name": NAME,
-            "education_list": Education.objects.all(),
+            "title_query": title_query,
+            "form": EducationForm(),
         }
     return render(request, "education.html", context)
-    
+
+def get_education_json(request):
+    title_query = request.GET.get("title", "").strip()
+    educations = Education.objects.all()
+
+    if title_query:
+        educations = educations.filter(title__icontains=title_query)
+
+    educations_json = serializers.serialize("json", educations)
+    return HttpResponse(educations_json, content_type="application/json")
+
+def delete_education(request, education_id):
+    education = get_object_or_404(Education, pk=education_id)
+
+    if request.method == "POST":
+        education.delete()
+        messages.success(request, "Pendidikan berhasil dihapus!")
+        return redirect("main:show_education")
+
+    return redirect("main:show_education")
+
+# ~~~~~ PROJECT SECTION ~~~~~  
 @login_required(login_url="/login/") 
 def create_project(request):
     if not request.user.is_superuser:
@@ -68,7 +167,7 @@ def show_projects(request):
     title_query = request.GET.get("title", "").strip()
 
     context = {
-        "name": "Burhan",
+        "name": NAME,
         "title_query": title_query,
         "form": ProjectForm(),
     }
@@ -113,6 +212,42 @@ def delete_project(request, project_id):
         return redirect("main:show_projects")
 
     return redirect("main:show_projects")
+
+# Tanpa cek is_superuser: semua akun yang sudah login boleh memberi star
+@login_required(login_url="/login/")
+def toggle_star(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+
+    if request.method == "POST":
+        # Kalau akun ini sudah pernah memberi star, batalkan star-nya.
+        # Kalau belum, tambahkan star.
+        if request.user in project.starred_by.all():
+            project.starred_by.remove(request.user)
+        else:
+            project.starred_by.add(request.user)
+
+    return redirect("main:show_projects")
+
+@require_POST
+def create_project_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Hanya pemilik portofolio yang dapat menambahkan proyek."},
+            status=403,
+        )
+
+    form = ProjectForm(request.POST)
+    if form.is_valid():
+        project = form.save()
+        return JsonResponse(
+            {"message": "Proyek berhasil ditambahkan.", "pk": str(project.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+# ~~~~~ AUTH SECTION ~~~~~ 
 def register(request):
     form = UserCreationForm(request.POST or None)
 
@@ -162,35 +297,3 @@ def login_user(request):
     }
     return render(request, "login.html", context)
 
-# Tanpa cek is_superuser: semua akun yang sudah login boleh memberi star
-@login_required(login_url="/login/")
-def toggle_star(request, project_id):
-    project = get_object_or_404(Project, pk=project_id)
-
-    if request.method == "POST":
-        # Kalau akun ini sudah pernah memberi star, batalkan star-nya.
-        # Kalau belum, tambahkan star.
-        if request.user in project.starred_by.all():
-            project.starred_by.remove(request.user)
-        else:
-            project.starred_by.add(request.user)
-
-    return redirect("main:show_projects")
-
-@require_POST
-def create_project_ajax(request):
-    if not request.user.is_superuser:
-        return JsonResponse(
-            {"message": "Hanya pemilik portofolio yang dapat menambahkan proyek."},
-            status=403,
-        )
-
-    form = ProjectForm(request.POST)
-    if form.is_valid():
-        project = form.save()
-        return JsonResponse(
-            {"message": "Proyek berhasil ditambahkan.", "pk": str(project.id)},
-            status=201,
-        )
-
-    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
