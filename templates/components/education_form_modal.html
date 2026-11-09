@@ -1,9 +1,9 @@
 <div id="add-education-modal"
-     class="education-form-modal"
+     class="project-form-modal"
      popover="auto"
      role="dialog"
      aria-modal="true"
-     aria-labelledby="add-education-modal-title">
+     aria-labelledby="add-project-modal-title">
     <button type="button"
             class="project-form-modal__backdrop"
             popovertarget="add-education-modal"
@@ -21,7 +21,7 @@
         <form id="education-form"
               method="post"
               action="{% url 'main:create_education' %}"
-              class="education-form">
+              class="project-form">
             {% csrf_token %}
             {% for field in form %}
                 <div class="form-group">
@@ -32,7 +32,7 @@
                     {% endfor %}
                 </div>
             {% endfor %}
-            <div class="education-form-modal__actions">
+            <div class="project-form-modal__actions">
                 <button type="button"
                         class="button button-secondary"
                         popovertarget="add-education-modal"

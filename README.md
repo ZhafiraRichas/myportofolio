@@ -17,7 +17,7 @@ Sejauh ini batasan dalam web static, tidak menghambat pembuatan web portofolio i
 
 Untuk penggunaan Gen Ai, saya menggunakan Gemini untuk keperluan memahami css pada template yg sudah ada pada tutorial 1 dan dengan manual saya mengimplementasikannya pada section-section yang baru dengan sepemahaman saya.
 
-### Tugas 2
+## Tugas 2
 
 1. Jelaskan alur yang terjadi ketika pengguna membuka halaman portofolio baru, mulai dari permintaan yang diterima proyek hingga data ditampilkan pada browser. Dalam jawabanmu, jelaskan peran urls.py proyek, urls.py aplikasi, view, model, dan template.
 
@@ -54,3 +54,4 @@ a. User mengirim request ke URL endpoint tertentu.
 b. Fungsi view di Django menerima request tersebut dan mengambil data portofolio dari database menggunakan QuerySet (berupa objek-objek model Django).
 c. Objek model Django tersebut melalui proses serialization akan diubah ke dalam format standar.
 d. Fungsi view mengembalikan objek respons HTTP (seperti JsonResponse atau HttpResponse dengan content type JSON) berisi data terformat tersebut ke klien.
+

@@ -23,13 +23,13 @@ class ExperienceForm(ModelForm):
         widgets = {
             "title": TextInput(
                 attrs={
-                    "placeholder": "Universitas Indonesia",
+                    "placeholder": "Web Portofolio",
                     "maxlength": 255,
                 }
             ),
             "description": Textarea(
                 attrs={
-                    "placeholder": "Tell us about your project",
+                    "placeholder": "Tell us about your experience",
                     "rows": 3,
                 }
             ),
