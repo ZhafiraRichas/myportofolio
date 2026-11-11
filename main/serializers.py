@@ -1,9 +1,38 @@
 from django.utils.html import strip_tags
 from rest_framework import serializers
 
-from main.models import Project
+from main.models import Project, Experience, Education
 
+class ExperienceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Experience
+        fields = ["id", "title", "description", "category", "thumbnail", "started_at", "ended_at"]
+        read_only_fields = ["id"]
 
+    def validate_title(self, value):
+        cleaned = strip_tags(value).strip()
+        if not cleaned:
+            raise serializers.ValidationError("Title cannot be empty.")
+        return cleaned
+
+    def validate_description(self, value):
+        return strip_tags(value).strip() if value else ""
+
+class EducationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Education
+        fields = ["id", "title", "description", "category", "thumbnail", "started_at", "ended_at"]
+        read_only_fields = ["id"]
+
+    def validate_title(self, value):
+        cleaned = strip_tags(value).strip()
+        if not cleaned:
+            raise serializers.ValidationError("Title cannot be empty.")
+        return cleaned
+
+    def validate_description(self, value):
+        return strip_tags(value).strip() if value else ""
+    
 class ProjectSerializer(serializers.ModelSerializer):
     star_count = serializers.SerializerMethodField()
     is_starred = serializers.SerializerMethodField()

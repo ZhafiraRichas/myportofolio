@@ -9,7 +9,7 @@
     <main>
         <section class="experience-section" id="experience">
             <div class="container">
-                <p class="section-kicker">Pengalaman saya selama ini </p>
+                <p class="section-kicker">Pengalaman saya selama ini</p>
                 <div class="project-header">
                     <h1>Experience</h1>
                     {% if user.is_superuser %}
@@ -21,7 +21,7 @@
                         </button>
                     {% endif %}
                 </div>
-                <form id="project-search-form" class="project-search">
+                <form id="experience-search-form" class="project-search">
                     <input type="search"
                            id="search-input"
                            name="title"
@@ -47,7 +47,7 @@
                     <p>Belum ada pengalaman yang ditambahkan atau ditemukan.</p>
                 </div>
 
-                <!-- Project Grid -->
+                <!-- Experience Grid -->
                 <div id="grid" class="experience-grid project-grid hide"></div>
 
             </div>
@@ -58,20 +58,18 @@
     {% endif %}
 
     <script>
-    const BASE_PROJECTS_ENDPOINT = "{% url 'api:project-list' %}";
-        const DETAIL_PROJECT_ENDPOINT = "{% url 'api:project-detail' '00000000-0000-0000-0000-000000000000' %}";
-        const STAR_PROJECT_ENDPOINT = "{% url 'api:project-star' '00000000-0000-0000-0000-000000000000' %}";
+        const BASE_EXPERIENCE_ENDPOINT = "{% url 'api:experience-list' %}";
+        const DETAIL_EXPERIENCE_ENDPOINT = "{% url 'api:experience-detail' '00000000-0000-0000-0000-000000000000' %}";
         const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
-        const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
 
         const loadingState = document.getElementById('loading');
         const errorState = document.getElementById('error');
         const emptyState = document.getElementById('empty');
         const gridContainer = document.getElementById('grid');
-        const searchForm = document.getElementById('project-search-form');
+        const searchForm = document.getElementById('experience-search-form');
         const searchInput = document.getElementById('search-input');
-        const projectForm = document.getElementById('project-form');
-        let projectsAbortController;
+        const experienceForm = document.getElementById('experience-form');
+        let experiencesAbortController;
         let searchDebounceTimer;
 
         function getCookie(name) {
@@ -87,57 +85,54 @@
                 .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
         }
 
-        function projectEndpoint(pattern, id) {
+        function experienceEndpoint(pattern, id) {
             return pattern.replace('00000000-0000-0000-0000-000000000000', id);
         }
 
-        function displayPageSection({ showLoading = false, showError = false,
-            showEmpty = false, showGrid = false }) {
+        function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
             loadingState.classList.toggle('hide', !showLoading);
             errorState.classList.toggle('hide', !showError);
             emptyState.classList.toggle('hide', !showEmpty);
             gridContainer.classList.toggle('hide', !showGrid);
         }
 
-        function buildProjectCardElement(project) {
+        function buildExperienceCardElement(experience) {
             const article = document.createElement('article');
             article.className = 'experience-card';
-            const image = project.project_image_url
-                ? `<img src="${escapeHtml(project.project_image_url)}" alt="${escapeHtml(project.title)}" class="project-image">` : '';
-            const link = project.project_url
-                ? `<a href="${escapeHtml(project.project_url)}" class="button">Open project</a>` : '';
-            const star = IS_AUTHENTICATED
-                ? `<button type="button" class="button button-star${project.is_starred ? ' is-starred' : ''}"
-                    data-action="star" data-id="${escapeHtml(project.id)}"
-                    title="${escapeHtml(project.starred_by_names)}">
-                    ${project.is_starred ? 'Unstar' : 'Star'} (${project.star_count})</button>`
-                : `<a href="{% url 'main:login' %}" class="button">Login to star (${project.star_count})</a>`;
+            
+            const company = experience.company 
+                ? `<span class="experience-category">${escapeHtml(experience.company)}</span>` : '';
+            const description = experience.description 
+                ? `<p class="experience-description">${escapeHtml(experience.description)}</p>` : '';
             const remove = IS_SUPERUSER
                 ? `<button type="button" class="button button-danger" data-action="delete"
-                    data-id="${escapeHtml(project.id)}">Delete</button>` : '';
-            article.innerHTML = `${image}<h2>${escapeHtml(project.title)}</h2>
-                <span class="experience-category">${escapeHtml(project.tech_stack)}</span>
-                <p class="experience-description">${escapeHtml(project.description)}</p>
-                <div class="project-card-actions"><div class="project-actions">
-                ${link}${star}${remove}</div></div>`;
+                    data-id="${escapeHtml(experience.id)}">Delete</button>` : '';
+
+            article.innerHTML = `
+                <h2>${escapeHtml(experience.title)}</h2>
+                ${company}
+                ${description}
+                <div class="project-card-actions">
+                    <div class="project-actions">${remove}</div>
+                </div>`;
             return article;
         }
 
-        async function fetchProjects(searchQuery = '') {
-            if (projectsAbortController) projectsAbortController.abort();
-            projectsAbortController = new AbortController();
+        async function fetchExperiences(searchQuery = '') {
+            if (experiencesAbortController) experiencesAbortController.abort();
+            experiencesAbortController = new AbortController();
             try {
                 displayPageSection({ showLoading: true });
-                const url = new URL(BASE_PROJECTS_ENDPOINT, window.location.origin);
+                const url = new URL(BASE_EXPERIENCE_ENDPOINT, window.location.origin);
                 if (searchQuery) url.searchParams.set('title', searchQuery);
                 const response = await fetch(url, {
                     headers: { Accept: 'application/json' },
-                    signal: projectsAbortController.signal,
+                    signal: experiencesAbortController.signal,
                 });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const projects = await response.json();
-                gridContainer.replaceChildren(...projects.map(buildProjectCardElement));
-                displayPageSection({ showGrid: projects.length > 0, showEmpty: projects.length === 0 });
+                const experiences = await response.json();
+                gridContainer.replaceChildren(...experiences.map(buildExperienceCardElement));
+                displayPageSection({ showGrid: experiences.length > 0, showEmpty: experiences.length === 0 });
             } catch (error) {
                 if (error.name === 'AbortError') return;
                 console.error(error);
@@ -150,7 +145,7 @@
             return messages.join(' ') || `Request failed (HTTP ${status}).`;
         }
 
-        async function writeProject(url, method, payload) {
+        async function writeExperience(url, method, payload) {
             const response = await fetch(url, {
                 method,
                 headers: {
@@ -166,41 +161,37 @@
             return data;
         }
 
-        async function addProject(event) {
+        async function addExperience(event) {
             event.preventDefault();
-            const button = projectForm.querySelector('button[type="submit"]');
+            const button = experienceForm.querySelector('button[type="submit"]');
             button.disabled = true;
             try {
-                const fields = new FormData(projectForm);
-                const payload = Object.fromEntries([
-                    'title', 'description', 'tech_stack', 'project_url', 'project_image_url',
-                ].map(name => [name, fields.get(name)]));
-                await writeProject(BASE_PROJECTS_ENDPOINT, 'POST', payload);
-                projectForm.reset();
-                document.getElementById('add-project-modal').hidePopover();
-                showToast('Success', 'Project created.', 'success');
-                await fetchProjects(searchInput.value.trim());
+                const formData = new FormData(experienceForm);
+                const payload = Object.fromEntries(formData.entries());
+                await writeExperience(BASE_EXPERIENCE_ENDPOINT, 'POST', payload);
+                experienceForm.reset();
+                document.getElementById('add-experience-modal').hidePopover();
+                showToast('Success', 'Experience created.', 'success');
+                await fetchExperiences(searchInput.value.trim());
             } catch (error) {
-                showToast('Could not create project', error.message, 'error');
+                showToast('Could not create experience', error.message, 'error');
             } finally {
                 button.disabled = false;
             }
         }
 
-        if (projectForm) projectForm.addEventListener('submit', addProject);
+        if (experienceForm) experienceForm.addEventListener('submit', addExperience);
 
         gridContainer.addEventListener('click', async function(event) {
             const button = event.target.closest('button[data-action]');
             if (!button || button.disabled) return;
             const action = button.dataset.action;
-            if (action === 'delete' && !window.confirm('Delete this project?')) return;
+            if (action === 'delete' && !window.confirm('Delete this experience?')) return;
             button.disabled = true;
             try {
-                const pattern = action === 'star' ? STAR_PROJECT_ENDPOINT : DETAIL_PROJECT_ENDPOINT;
-                await writeProject(projectEndpoint(pattern, button.dataset.id),
-                    action === 'star' ? 'POST' : 'DELETE');
-                showToast('Success', action === 'star' ? 'Star updated.' : 'Project deleted.', 'success');
-                await fetchProjects(searchInput.value.trim());
+                await writeExperience(experienceEndpoint(DETAIL_EXPERIENCE_ENDPOINT, button.dataset.id), 'DELETE');
+                showToast('Success', 'Experience deleted.', 'success');
+                await fetchExperiences(searchInput.value.trim());
             } catch (error) {
                 showToast('Request failed', error.message, 'error');
             } finally {
@@ -210,14 +201,14 @@
 
         searchInput.addEventListener('input', function() {
             clearTimeout(searchDebounceTimer);
-            searchDebounceTimer = setTimeout(() => fetchProjects(searchInput.value.trim()), 300);
+            searchDebounceTimer = setTimeout(() => fetchExperiences(searchInput.value.trim()), 300);
         });
         searchForm.addEventListener('submit', function(event) {
             event.preventDefault();
             clearTimeout(searchDebounceTimer);
-            fetchProjects(searchInput.value.trim());
+            fetchExperiences(searchInput.value.trim());
         });
-        fetchProjects(searchInput.value.trim());
+        fetchExperiences(searchInput.value.trim());
     </script>
     {% endblock content %}
 </body>

@@ -5,8 +5,61 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
-from main.models import Project
+from main.models import Project, Experience, Education
 
+class ExperienceAndEducationAPITest(APITestCase):
+    def setUp(self):
+        self.owner = User.objects.create_superuser(
+            username="owner", password="test-password", email="owner@example.com"
+        )
+        self.editor = User.objects.create_user(username="editor", password="test-password")
+        editor_group, _ = Group.objects.get_or_create(name="Editor")
+        self.editor.groups.add(editor_group)
+
+        self.experience = Experience.objects.create(title="Software Intern")
+        self.education = Education.objects.create(title="Bachelor of CS")
+
+        self.exp_list_url = reverse("api:experience-list")
+        self.exp_detail_url = reverse("api:experience-detail", args=[self.experience.id])
+
+        self.edu_list_url = reverse("api:education-list")
+        self.edu_detail_url = reverse("api:education-detail", args=[self.education.id])
+
+    def test_experience_crud_permissions(self):
+        # GET (Public)
+        res = self.client.get(self.exp_list_url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        # Editor: POST ditolak, PATCH diizinkan
+        self.client.force_authenticate(user=self.editor)
+        res = self.client.post(self.exp_list_url, {"title": "New Exp"}, format="json")
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+        res = self.client.patch(self.exp_detail_url, {"title": "Updated Exp"}, format="json")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        # Owner: DELETE diizinkan
+        self.client.force_authenticate(user=self.owner)
+        res = self.client.delete(self.exp_detail_url)
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_education_crud_permissions(self):
+        # GET (Public)
+        res = self.client.get(self.edu_list_url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        # Editor: POST ditolak, PATCH diizinkan
+        self.client.force_authenticate(user=self.editor)
+        res = self.client.post(self.edu_list_url, {"title": "New Edu"}, format="json")
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+        res = self.client.patch(self.edu_detail_url, {"title": "Updated Edu"}, format="json")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        # Owner: DELETE diizinkan
+        self.client.force_authenticate(user=self.owner)
+        res = self.client.delete(self.edu_detail_url)
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
 
 class ProjectAPITest(APITestCase):
     def setUp(self):
